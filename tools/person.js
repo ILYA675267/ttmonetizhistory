@@ -2,7 +2,7 @@
 // Углы в градусах: 0 — вниз, 90 — вправо, 180 — вверх (в системе тела, до поворота rot).
 const SKIN = '#EBC6A0', SKIN_D = '#D9AE86';
 const LOOK = { jacket: '#E3732F', jacketD: '#C45B20', pants: '#33465A', pantsD: '#283849', glove: '#252A30',
-  boot: '#2A2F36', hat: '#2E6E73', hatD: '#24585C', pom: '#ECE6DA', pack: '#8C3B2A' };
+  boot: '#2A2F36', hat: '#2E6E73', hatD: '#24585C', pom: '#ECE6DA', pack: '#8C3B2A', hair: null };   // hair — волосы вместо шапки
 
 function limb(p, a1, l1, a2, l2, color, wid) {
   const [d1x, d1y] = dir(a1), [d2x, d2y] = dir(a2);
@@ -16,7 +16,8 @@ function head(cx, cy, r, { look = 0, blink = 0, mood = 'calm', frost = 0, goggle
   const ex = look * r * 0.22, ey = r * 0.2, er = r * 0.085;
   const eh = Math.max(0.08, 1 - blink);
   const brow = mood === 'scared' ? 14 : 4;
-  let s = `<g transform="translate(${f1(cx)} ${f1(cy)})">
+  const hair = LOOK.hair;
+  let s = `<g transform="translate(${f1(cx)} ${f1(cy)})">${hair ? `<rect x="${-r * 1.12}" y="${-r * 1.02}" width="${r * 2.24}" height="${r * 1.9}" rx="${r * 0.9}" fill="${hair}"/>` : ''}
     <rect x="${-r * 0.28}" y="${r * 0.7}" width="${r * 0.56}" height="${r * 0.5}" rx="${r * 0.1}" fill="${SKIN_D}"/>
     <circle r="${r}" fill="${SKIN}"/>
     <path d="M${r * 0.35} ${-r * 0.94} A${r} ${r} 0 0 1 ${r * 0.35} ${r * 0.94} A${r * 1.25} ${r * 1.25} 0 0 0 ${r * 0.35} ${-r * 0.94}Z" fill="#000" opacity=".06"/>
@@ -30,12 +31,14 @@ function head(cx, cy, r, { look = 0, blink = 0, mood = 'calm', frost = 0, goggle
   s += mood === 'scared'
     ? `<ellipse cx="${ex * 0.8}" cy="${r * 0.56}" rx="${r * 0.08}" ry="${r * 0.1}" fill="#5A3A30"/>`
     : `<line x1="${ex * 0.8 - r * 0.1}" y1="${r * 0.56}" x2="${ex * 0.8 + r * 0.1}" y2="${r * 0.56}" stroke="#5A3A30" stroke-width="${r * 0.05}" stroke-linecap="round"/>`;
+  if (hair) s += `<path d="M${-r * 1.02} ${-r * 0.05} A${r * 1.03} ${r * 1.03} 0 0 1 ${r * 1.02} ${-r * 0.05} Q${r * 0.5} ${-r * 0.55} ${-r * 0.1} ${-r * 0.42} Q${-r * 0.6} ${-r * 0.35} ${-r * 1.02} ${-r * 0.05}Z" fill="${hair}"/>
+    <path d="M${-r * 0.3} ${-r * 0.95} Q${r * 0.3} ${-r * 0.85} ${r * 0.7} ${-r * 0.6}" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="${r * 0.08}" stroke-linecap="round"/>`;
   // шапка: купол + отворот + помпон
-  s += `<path d="M${-r * 1.04} ${-r * 0.12} A${r * 1.04} ${r * 1.04} 0 0 1 ${r * 1.04} ${-r * 0.12}Z" fill="${LOOK.hat}"/>
+  else s += `<path d="M${-r * 1.04} ${-r * 0.12} A${r * 1.04} ${r * 1.04} 0 0 1 ${r * 1.04} ${-r * 0.12}Z" fill="${LOOK.hat}"/>
     <path d="M${r * 0.2} ${-r * 1.0} A${r * 1.04} ${r * 1.04} 0 0 1 ${r * 1.04} ${-r * 0.12} L${r * 0.6} ${-r * 0.12}Z" fill="#000" opacity=".08"/>
     <rect x="${-r * 1.1}" y="${-r * 0.34}" width="${r * 2.2}" height="${r * 0.3}" rx="${r * 0.15}" fill="${LOOK.hatD}"/>
     <circle cy="${-r * 1.12}" r="${r * 0.24}" fill="${LOOK.pom}"/>`;
-  if (goggles) s += `<rect x="${-r * 1.08}" y="${-r * 0.62}" width="${r * 2.16}" height="${r * 0.12}" fill="#1E2227"/>
+  if (goggles && !hair) s += `<rect x="${-r * 1.08}" y="${-r * 0.62}" width="${r * 2.16}" height="${r * 0.12}" fill="#1E2227"/>
     <rect x="${-r * 0.62}" y="${-r * 0.78}" width="${r * 1.24}" height="${r * 0.42}" rx="${r * 0.2}" fill="#1E2227"/>
     <rect x="${-r * 0.55}" y="${-r * 0.72}" width="${r * 1.1}" height="${r * 0.3}" rx="${r * 0.15}" fill="#F0A13A"/>
     <rect x="${-r * 0.42}" y="${-r * 0.68}" width="${r * 0.3}" height="${r * 0.08}" rx="${r * 0.04}" fill="#fff" opacity=".6"/>`;
