@@ -34,7 +34,7 @@ def main():
         f"[1:a]{au},apad=whole_dur={story}[v];[2:a]{au},volume={mvol}[m];[v][m]amix=inputs=2:normalize=0:duration=first,asplit[s1][s2];"
         f"[s1]atrim=0:{b},asetpts=PTS-STARTPTS,afade=t=out:st={b - 0.08}:d=0.08[a1];"
         f"[s2]atrim=start={b},asetpts=PTS-STARTPTS,afade=t=in:d=0.08[a3];"
-        f"[3:a]{au},volume={AD_GAIN}[a2];[a1][a2][a3]concat=n=3:v=0:a=1[a];"
+        f"[3:a]{au},volume={AD_GAIN}[a2];[a1][a2][a3]concat=n=3:v=0:a=1,alimiter=limit=0.9:level=disabled[a];"
         f"[3:v]chromakey=0x00FF00:0.25:0.05,despill=green,scale={width}:-1,setpts=PTS-STARTPTS+{b}/TB[ad];"
         f"[0:v][ad]overlay=(W-w)/2:(H-h)/2:eof_action=pass,format=yuv420p[vv]")
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-framerate", "30", "-i", os.path.join(frames, "f%04d.jpg"),
