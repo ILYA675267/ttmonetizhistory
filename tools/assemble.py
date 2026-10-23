@@ -1,6 +1,6 @@
 """Сборка ролика: кадры + голос + музыка + баннер (вариант А — стоп-кадр).
 
-python3 tools/assemble.py <папка_кадров> <voice.wav> <music.wav> <секунда_баннера> <выход.mp4> [баннер.mp4] [ширина=1040]
+python3 tools/assemble.py <папка_кадров> <voice.wav> <music.wav> <секунда_баннера> <выход.mp4> [баннер.mp4] [ширина=1040] [громкость_музыки=0.35]
 
 Кадры уже содержат стоп-кадр (сцена рендерит паузу сама). Здесь: баннер по центру с секунды B (зелёный фон убирается,
 длина и скорость баннера — как в файле, звук баннера из файла, +6 дБ как раньше), голос и музыка на паузе молчат,
@@ -25,12 +25,13 @@ def main():
     frames, voice, music, b, out = sys.argv[1:6]
     ad = sys.argv[6] if len(sys.argv) > 6 else AD
     width = int(sys.argv[7]) if len(sys.argv) > 7 else 1040
+    mvol = float(sys.argv[8]) if len(sys.argv) > 8 else MUSIC_VOL
     b = float(b)
     ad_len = duration(ad)
     au = "aformat=sample_rates=48000:channel_layouts=stereo"
     story = duration(music)                            # музыка = длина истории без баннера
     graph = (
-        f"[1:a]{au},apad=whole_dur={story}[v];[2:a]{au},volume={MUSIC_VOL}[m];[v][m]amix=inputs=2:normalize=0:duration=first,asplit[s1][s2];"
+        f"[1:a]{au},apad=whole_dur={story}[v];[2:a]{au},volume={mvol}[m];[v][m]amix=inputs=2:normalize=0:duration=first,asplit[s1][s2];"
         f"[s1]atrim=0:{b},asetpts=PTS-STARTPTS,afade=t=out:st={b - 0.08}:d=0.08[a1];"
         f"[s2]atrim=start={b},asetpts=PTS-STARTPTS,afade=t=in:d=0.08[a3];"
         f"[3:a]{au},volume={AD_GAIN}[a2];[a1][a2][a3]concat=n=3:v=0:a=1[a];"
