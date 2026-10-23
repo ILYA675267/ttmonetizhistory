@@ -1,9 +1,9 @@
 """Тихая спокойная музыка под историю — синтезируется целиком (без чужих треков и жалоб).
 
-python3 tools/music.py <выход.wav> <длительность_с> [muffle_с] [rumble_с0,rumble_с1] [seed]
+python3 tools/music.py <выход.wav> <длительность_с> [muffle_с] [a-b;c-d] [seed]
 
 Мягкий пэд Dm – B♭ – F – C (по 2,5 с), низкий гул, редкие «колокольчики», реверберация.
-muffle — с этой секунды звук глухой (как под снегом / под водой). rumble — гул лавины на отрезке.
+muffle — с этой секунды звук глухой (как под снегом / под водой). rumble — гул лавины на отрезках «a-b;c-d».
 """
 import math
 import subprocess
@@ -39,7 +39,7 @@ def reverb(x, wet=0.35):
 def main():
     out, dur = sys.argv[1], float(sys.argv[2])
     muffle = float(sys.argv[3]) if len(sys.argv) > 3 and sys.argv[3] != '-' else None
-    rumble = tuple(map(float, sys.argv[4].split(','))) if len(sys.argv) > 4 and sys.argv[4] != '-' else None
+    rumble = [tuple(map(float, r.split('-'))) for r in sys.argv[4].split(';')] if len(sys.argv) > 4 and sys.argv[4] != '-' else None
     rng = np.random.default_rng(int(sys.argv[5]) if len(sys.argv) > 5 else 3)
     n = int(dur * SR)
     t = np.arange(n) / SR
@@ -64,10 +64,10 @@ def main():
         bells[s:] += 0.22 * np.exp(-k * 1.6) * (np.sin(2 * np.pi * f * k) + 0.3 * np.sin(2 * np.pi * 2.01 * f * k))
     mix = reverb(pad + drone + bells, 0.5)
     if rumble:
-        r0, r1 = rumble
         noise = lowpass(rng.standard_normal(n), 90) * 6
-        env = np.clip((t - r0) / (r1 - r0), 0, 1) ** 2 * (t < r1 + 0.05)
-        mix += noise * env * 1.2
+        for r0, r1 in rumble:
+            env = np.clip((t - r0) / (r1 - r0), 0, 1) ** 2 * np.clip((r1 + 0.6 - t) / 0.6, 0, 1)
+            mix += noise * env * 1.2
     if muffle is not None:
         dull = lowpass(mix, 380)
         k = np.clip((t - muffle) / 0.25, 0, 1)

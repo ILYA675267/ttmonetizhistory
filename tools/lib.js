@@ -26,21 +26,23 @@ function subs(t, list, y = 1230) {
   const words = s.text.split(' '), lines = [[]];
   for (const w of words) {
     const cur = lines[lines.length - 1];
-    if (cur.length && (cur.join(' ') + ' ' + w).length > (s.max || 17)) lines.push([w]); else cur.push(w);
+    if (cur.length && (cur.join(' ') + ' ' + w).length > (s.max || 20)) lines.push([w]); else cur.push(w);
   }
   const keys = s.keys || {};
   const out = lines.map((ln, i) => `<text x="540" y="${y + i * 92}" text-anchor="middle">${ln.map(w => {
     const c = keys[w.replace(/[.,!?…:]/g, '')];
     return c ? `<tspan fill="${c}">${w}</tspan>` : w;
   }).join(' ')}</text>`).join('');
-  return `<g transform="translate(540 ${y}) scale(${lerp(0.9, 1, k)}) translate(-540 ${-y})" opacity="${k}"
+  const glow = `<ellipse cx="540" cy="${y - 28 + (lines.length - 1) * 46}" rx="440" ry="${60 + lines.length * 44}" fill="#000" opacity=".28" filter="url(#blur18)"/>`;
+  return `<g transform="translate(540 ${y}) scale(${lerp(0.9, 1, k)}) translate(-540 ${-y})" opacity="${k}">${glow}<g
     font-family="Oswald" font-size="84" fill="#fff" letter-spacing="1" filter="url(#tshadow)"
-    style="paint-order:stroke" stroke="rgba(0,0,0,.45)" stroke-width="9" stroke-linejoin="round">${out}</g>`;
+    style="paint-order:stroke" stroke="rgba(0,0,0,.45)" stroke-width="9" stroke-linejoin="round">${out}</g></g>`;
 }
 
 // Верхняя строка: время · место (моно), под ней цветная плашка шага.
 function hud(top, pill, { color = GOLD, k = 1 } = {}) {
-  let s = `<text x="540" y="150" text-anchor="middle" font-family="Mono" font-size="30" letter-spacing="5"
+  let s = `<ellipse cx="540" cy="180" rx="380" ry="70" fill="#000" opacity="${0.25 * k}" filter="url(#blur18)"/>`;
+  s += `<text x="540" y="150" text-anchor="middle" font-family="Mono" font-size="30" letter-spacing="5"
     fill="#fff" opacity="${0.8 * k}">${top}</text>`;
   if (pill) s += tag(540, 205, pill, { bg: color, fg: '#1a1a1a', k, size: 30 });
   return s;
@@ -75,9 +77,12 @@ function card(x, y, w, h, inner, k = 1) {
 const DEFS = `<filter id="tshadow" x="-20%" y="-50%" width="140%" height="200%"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#000" flood-opacity=".55"/></filter>
   <filter id="soft" x="-30%" y="-60%" width="160%" height="220%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity=".3"/></filter>
   <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
-  <filter id="blur18" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+  <filter id="blur18" x="-50%" y="-80%" width="200%" height="260%"><feGaussianBlur stdDeviation="18"/></filter>
   <radialGradient id="vign" cx="50%" cy="45%" r="75%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".65"/></radialGradient>`;
 
 function frame(body, extraDefs = '') {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs>${DEFS}${extraDefs}</defs>${body}</svg>`;
 }
+
+// Временно подменить цвета персонажа (другой герой — другая куртка/шапка).
+function withPal(pal, fn) { const old = { ...LOOK }; Object.assign(LOOK, pal); const s = fn(); Object.assign(LOOK, old); return s; }
