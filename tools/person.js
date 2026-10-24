@@ -2,7 +2,7 @@
 // Углы в градусах: 0 — вниз, 90 — вправо, 180 — вверх (в системе тела, до поворота rot).
 const SKIN = '#EBC6A0', SKIN_D = '#D9AE86';
 const LOOK = { jacket: '#E3732F', jacketD: '#C45B20', pants: '#33465A', pantsD: '#283849', glove: '#252A30',
-  boot: '#2A2F36', hat: '#2E6E73', hatD: '#24585C', pom: '#ECE6DA', pack: '#8C3B2A', hair: null };   // hair — волосы вместо шапки
+  boot: '#2A2F36', hat: '#2E6E73', hatD: '#24585C', pom: '#ECE6DA', pack: '#8C3B2A', hair: null, hairShort: false };   // hair — волосы вместо шапки
 
 function limb(p, a1, l1, a2, l2, color, wid) {
   const [d1x, d1y] = dir(a1), [d2x, d2y] = dir(a2);
@@ -17,7 +17,7 @@ function head(cx, cy, r, { look = 0, blink = 0, mood = 'calm', frost = 0, goggle
   const eh = Math.max(0.08, 1 - blink);
   const brow = mood === 'scared' ? 14 : 4;
   const hair = LOOK.hair;
-  let s = `<g transform="translate(${f1(cx)} ${f1(cy)})">${hair ? `<rect x="${-r * 1.12}" y="${-r * 1.02}" width="${r * 2.24}" height="${r * 1.9}" rx="${r * 0.9}" fill="${hair}"/>` : ''}
+  let s = `<g transform="translate(${f1(cx)} ${f1(cy)})">${hair && !LOOK.hairShort ? `<rect x="${-r * 1.12}" y="${-r * 1.02}" width="${r * 2.24}" height="${r * 1.9}" rx="${r * 0.9}" fill="${hair}"/>` : ''}
     <rect x="${-r * 0.28}" y="${r * 0.7}" width="${r * 0.56}" height="${r * 0.5}" rx="${r * 0.1}" fill="${SKIN_D}"/>
     <circle r="${r}" fill="${SKIN}"/>
     <path d="M${r * 0.35} ${-r * 0.94} A${r} ${r} 0 0 1 ${r * 0.35} ${r * 0.94} A${r * 1.25} ${r * 1.25} 0 0 0 ${r * 0.35} ${-r * 0.94}Z" fill="#000" opacity=".06"/>
