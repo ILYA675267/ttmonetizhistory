@@ -28,6 +28,7 @@ function subs(t, list, y = 1230) {
     const cur = lines[lines.length - 1];
     if (cur.length && (cur.join(' ') + ' ' + w).length > (s.max || 20)) lines.push([w]); else cur.push(w);
   }
+  y = Math.min(y, 1850 - (lines.length - 1) * 92);        // длинная фраза не уходит за низ экрана
   const keys = s.keys || {};
   const out = lines.map((ln, i) => `<text x="540" y="${y + i * 92}" text-anchor="middle">${ln.map(w => {
     const c = keys[w.replace(/[.,!?…:]/g, '')];

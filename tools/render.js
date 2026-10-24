@@ -11,8 +11,9 @@ const font = (name, file) => `@font-face{font-family:'${name}';src:url(data:font
 (async () => {
   const [scene, outDir, only] = process.argv.slice(2);
   fs.mkdirSync(outDir, { recursive: true });
-  const code = ['lib.js', 'person.js'].map(f => fs.readFileSync(path.join(__dirname, f), 'utf8')).join('\n')
-    + '\n' + fs.readFileSync(scene, 'utf8');
+  const sceneCode = fs.readFileSync(scene, 'utf8');
+  const libs = ['lib.js', 'person.js'].concat(sceneCode.includes('@common') ? ['common.js'] : []);   // общие сцены — по метке в файле
+  const code = libs.map(f => fs.readFileSync(path.join(__dirname, f), 'utf8')).join('\n') + '\n' + sceneCode;
   const css = font('Oswald', 'Oswald-Bold.ttf') + font('Mono', 'JetBrainsMono-Bold.ttf') + font('Inter', 'Inter-ExtraBold.ttf');
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
