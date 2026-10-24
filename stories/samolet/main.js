@@ -1,6 +1,6 @@
 // «Самолёт на воде», часть 1. Время — по шкале голоса (work/samolet/words.json).
-// Баннер: на секунде B ролик замирает (лёгкий наезд), 7,2 с баннер, потом история с того же места.
-const B = 47.66, AD = 7.2, STORY = 87.0;
+// Баннер — строго посередине истории (B ≈ STORY/2, в паузе между фразами): ролик замирает (лёгкий наезд), 7,2 с баннер, потом история с того же места.
+const B = 43.68, AD = 7.2, STORY = 87.0;
 const DUR = STORY + AD;
 
 const SUBS = [
@@ -254,7 +254,7 @@ function sVest(t) {                          // 38.2–B: жилеты в про
 }
 
 function sWing(t) {                          // B–50.1: на крыле дёргает шнур
-  const u = t - B, k = ease(prog(u, 0.5, 1.4));
+  const u = t - 47.66, k = ease(prog(u, 0.5, 1.4));
   let world = `<rect x="-300" y="-300" width="1700" height="1400" fill="url(#skyDusk)"/>
     <rect x="-300" y="1080" width="1700" height="1400" fill="url(#sea)"/>${seaWaves(1080, u)}
     <path d="M-200 1130 L 1300 1010 L 1300 1080 L -200 1190Z" fill="#B9C4CD"/><path d="M-200 1190 L1300 1080 L1300 1100 L-200 1215Z" fill="#7F8C97"/>`;
@@ -358,7 +358,7 @@ function sEnd(t) {
 }
 
 const SCENES = [[0, sHook], [3.9, sPinned], [6.4, sAnya], [9.2, sEngines], [16.2, sBrace], [23.0, sRows], [28.0, sExit],
-  [38.2, sVest], [B, sWing], [50.1, sCold], [62.6, sRaft], [74.2, sCount], [80.9, sDry], [85.0, sEnd]];
+  [38.2, sVest], [47.66, sWing], [50.1, sCold], [62.6, sRaft], [74.2, sCount], [80.9, sDry], [85.0, sEnd]];
 
 function story(t) {
   let i = SCENES.length - 1;

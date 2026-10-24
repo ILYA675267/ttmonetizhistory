@@ -1,6 +1,6 @@
 // «Заперт в багажнике», часть 1. Время — по шкале голоса (work/bagazhnik/words.json).
-// Баннер: на секунде B ролик замирает (лёгкий наезд), 7,2 с баннер, потом история с того же места.
-const B = 39.30, AD = 7.2, STORY = 97.0;
+// Баннер — строго посередине истории (B ≈ STORY/2, в паузе между фразами): ролик замирает (лёгкий наезд), 7,2 с баннер, потом история с того же места.
+const B = 48.56, AD = 7.2, STORY = 97.0;
 const DUR = STORY + AD;
 
 const SUBS = [
@@ -187,7 +187,7 @@ function sLever(t) {                         // 27.3–B: где должна б
 }
 
 function sSeats(t) {                         // B–51.2: давит ногами в спинку — не поддаётся
-  const u = t - B, push = Math.max(0, Math.sin(u * 3)) * prog(u, 6.0, 6.4);
+  const u = t - 39.30, push = Math.max(0, Math.sin(u * 3)) * prog(u, 6.0, 6.4);
   let world = trunk(u, { look: -0.8, mood: 'scared', extra: `<g transform="translate(${f1(push * 8 * prog(u, 6, 9.4))} 0)"><rect x="960" y="540" width="70" height="860" rx="20" fill="#3C4654"/></g>` });
   world += `<rect x="1030" y="500" width="300" height="900" fill="#20262E"/>`;
   const ov = arrow(760, 1250, 940, 1250, GOLD, prog(u, 6.0, 6.4), 12)
@@ -289,7 +289,7 @@ function sEnd(t) {
     <text x="540" y="1190" text-anchor="middle" font-family="Mono" font-size="24" letter-spacing="6" fill="#9FB7C6" opacity=".7">БАГАЖНИК · ПРОДОЛЖЕНИЕ СЛЕДУЕТ</text></g>`;
 }
 
-const SCENES = [[0, sHook], [6.5, sHandle], [10.7, sWake], [17.0, sBreath], [27.3, sLever], [B, sSeats], [51.2, sLights],
+const SCENES = [[0, sHook], [6.5, sHandle], [10.7, sWake], [17.0, sBreath], [27.3, sLever], [39.30, sSeats], [51.2, sLights],
   [64.9, sRoute], [79.9, sStop], [87.2, sOther], [95.0, sEnd]];
 
 function story(t) {

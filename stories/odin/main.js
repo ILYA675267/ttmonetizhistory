@@ -1,6 +1,6 @@
 // «Один на Земле», часть 1. Время — по шкале голоса (work/odin/words.json).
-// Баннер: на секунде B ролик замирает (лёгкий наезд), 7,2 с баннер, потом история с того же места.
-const B = 54.41, AD = 7.2, STORY = 100.0;
+// Баннер — строго посередине истории (B ≈ STORY/2, в паузе между фразами): ролик замирает (лёгкий наезд), 7,2 с баннер, потом история с того же места.
+const B = 49.27, AD = 7.2, STORY = 100.0;
 const DUR = STORY + AD;
 
 const SUBS = [
@@ -305,7 +305,7 @@ function houseFence(u, { night = 0, shake = 0, gateLit = 0 } = {}) {
 }
 
 function sFence(t) {                         // B–57.9: дом с высоким забором
-  const u = t - B;
+  const u = t - 54.41;
   const world = houseFence(u);
   return camera(world, { t, zoom: lerp(1.1, 1.0, ease(u / 3.5)), cx: 540, cy: 1000, shake: 0.8 }) + vign
     + tag(880, 1000, 'ЗАБОР 2,5 М', { k: prog(u, 0.8, 1.2), size: 28, bg: GREEN, fg: '#0f1a12', px: 900, py: 1100 })
@@ -416,7 +416,7 @@ function sEnd(t) {
 }
 
 const SCENES = [[0, sHook], [3.8, sAlone], [8.2, sTimer], [12.1, sMorning], [20.0, sPower], [27.1, sGen], [31.7, sWater],
-  [42.9, sFood], [B, sFence], [57.9, sWound], [71.5, sSignal], [79.8, sSafe], [87.4, sKnock], [92.5, sRadio], [98.3, sEnd]];
+  [42.9, sFood], [54.41, sFence], [57.9, sWound], [71.5, sSignal], [79.8, sSafe], [87.4, sKnock], [92.5, sRadio], [98.3, sEnd]];
 
 function story(t) {
   let i = SCENES.length - 1;
