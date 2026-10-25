@@ -87,3 +87,24 @@ function frame(body, extraDefs = '') {
 
 // Временно подменить цвета персонажа (другой герой — другая куртка/шапка).
 function withPal(pal, fn) { const old = { ...LOOK }; Object.assign(LOOK, pal); const s = fn(); Object.assign(LOOK, old); return s; }
+
+// Субтитры «караоке» (как в понравившемся пользователю ролике): обычный регистр, слова загораются по ходу фразы —
+// сказанные белые, ещё не сказанные серые, ключевые — цветом. pill — белая плашка под текстом (для светлых сцен).
+function subsK(t, list, y = 1250, { pill = false } = {}) {
+  const s = list.find(c => t >= c.a && t < c.b);
+  if (!s) return '';
+  const words = s.text.split(' '), keys = s.keys || {};
+  const k0 = eout(prog(t, s.a, s.a + 0.12)), span = Math.max(0.3, (s.b - s.a) * 0.75);
+  const lines = [[]];
+  for (const w of words) { const cur = lines[lines.length - 1]; if (cur.length && (cur.join(' ') + ' ' + w).length > (s.max || 24)) lines.push([w]); else cur.push(w); }
+  y = Math.min(y, 1850 - (lines.length - 1) * 74);
+  let i = 0;
+  const body = lines.map((ln, li) => `<text x="540" y="${y + li * 74}" text-anchor="middle">${ln.map(w => {
+    const on = t >= s.a + span * (i++ / words.length), c = keys[w.replace(/[.,!?…:«»]/g, '')];
+    return `<tspan fill="${on ? (c || (pill ? '#14181D' : '#fff')) : (pill ? '#8A8F96' : '#8C9199')}">${w}</tspan>`;
+  }).join(' ')}</text>`).join('');
+  const wmax = Math.max(...lines.map(l => l.join(' ').length)) * 31 + 60;
+  const bg = pill ? `<rect x="${f1(540 - wmax / 2)}" y="${y - 62}" width="${f1(wmax)}" height="${lines.length * 74 + 22}" rx="22" fill="#fff" opacity=".96"/>`
+    : `<ellipse cx="540" cy="${y - 20 + (lines.length - 1) * 37}" rx="440" ry="${60 + lines.length * 36}" fill="#000" opacity=".3" filter="url(#blur18)"/>`;
+  return `<g opacity="${f1(k0)}">${bg}<g font-family="Inter" font-size="58" ${pill ? '' : 'filter="url(#tshadow)"'}>${body}</g></g>`;
+}

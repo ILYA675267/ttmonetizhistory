@@ -13,6 +13,8 @@ const DEFS_COMMON = `<linearGradient id="skyM" x1="0" y1="0" x2="0" y2="1"><stop
   <radialGradient id="glowR" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${RED}" stop-opacity=".8"/><stop offset="1" stop-color="${RED}" stop-opacity="0"/></radialGradient>
   <radialGradient id="glowG" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${GREEN}" stop-opacity=".7"/><stop offset="1" stop-color="${GREEN}" stop-opacity="0"/></radialGradient>
   <radialGradient id="glowW" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFFBEA" stop-opacity="1"/><stop offset=".45" stop-color="#FFF2C4" stop-opacity=".55"/><stop offset="1" stop-color="#FFF2C4" stop-opacity="0"/></radialGradient>
+  <filter id="onlyR"><feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter>
+  <filter id="onlyGB"><feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
   <radialGradient id="lamp" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#F4C877" stop-opacity=".55"/><stop offset="1" stop-color="#F4C877" stop-opacity="0"/></radialGradient>`;
 
 function arrow(x1, y1, x2, y2, c, k = 1, w = 10) {
@@ -125,4 +127,40 @@ function makeRender(SCENES, B, AD, defs) {
     }
     return frame(story(t < B ? t : t - AD), DEFS_COMMON + defs);
   };
+}
+
+// ---- приёмы из понравившегося ролика (пользователь просил учитывать) ----
+const NEON = '#FF3D8B';
+// верхняя панель из трёх показателей (ВРЕМЯ · <ресурс> · РИСК с полоской) — держится весь ролик
+function statBar(time, label, value, risk, { k = 1, riskLabel = 'РИСК' } = {}) {
+  const rc = risk > 0.66 ? RED : risk > 0.33 ? GOLD : '#9FB7C6';
+  return `<g opacity="${f1(k)}"><rect x="40" y="80" width="1000" height="120" rx="20" fill="#0C1117" fill-opacity=".85" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>
+    <text x="80" y="122" font-family="Mono" font-size="20" letter-spacing="4" fill="#5B6876">ВРЕМЯ</text><text x="80" y="172" font-family="Mono" font-size="40" fill="#fff">${time}</text>
+    <text x="380" y="122" font-family="Mono" font-size="20" letter-spacing="4" fill="#5B6876">${label}</text><text x="380" y="172" font-family="Mono" font-size="40" fill="${GOLD}">${value}</text>
+    <text x="660" y="122" font-family="Mono" font-size="20" letter-spacing="4" fill="#5B6876">${riskLabel}</text><text x="660" y="172" font-family="Mono" font-size="40" fill="${rc}">${Math.round(risk * 100)}%</text>
+    <rect x="790" y="152" width="210" height="12" rx="6" fill="#fff" opacity=".1"/><rect x="790" y="152" width="${f1(210 * clamp(risk))}" height="12" rx="6" fill="${rc}"/></g>`;
+}
+// красный штамп с поворотом («НЕЛЬЗЯ», «ЗАБЛОКИРОВАНА»): влетает с увеличения
+function stamp(x, y, text, k, { rot = -6, color = RED, size = 54 } = {}) {
+  if (k <= 0) return '';
+  const sc = lerp(1.8, 1, eout(k)), w = text.length * size * 0.68 + 60;
+  return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${f1(sc)})" opacity="${f1(clamp(k * 3))}">
+    <rect x="${-w / 2}" y="${-size * 0.85}" width="${w}" height="${size * 1.5}" rx="10" fill="${color}"/><rect x="${-w / 2 + 8}" y="${-size * 0.85 + 8}" width="${w - 16}" height="${size * 1.5 - 16}" rx="6" fill="none" stroke="#fff" stroke-width="4" opacity=".8"/>
+    <text y="${size * 0.32}" text-anchor="middle" font-family="Inter" font-size="${size}" fill="#fff" letter-spacing="2">${text}</text></g>`;
+}
+// неоновый «глитч» вокруг персонажа/объекта: красная и голубая копии со сдвигом
+function glitch(svg, amt = 9, u = 0) {
+  const j = amt * (1 + 0.6 * Math.sin(u * 23) * (Math.sin(u * 3.1) > 0.85 ? 3 : 0.2));
+  return `<g filter="url(#onlyR)" opacity=".75" transform="translate(${f1(-j)} 0)">${svg}</g><g filter="url(#onlyGB)" opacity=".75" transform="translate(${f1(j)} 0)">${svg}</g>${svg}`;
+}
+// «мысль №N»: заголовок над вариантом, который сейчас разбираем
+function thought(n, text, k) { return `<text x="540" y="290" text-anchor="middle" font-family="Mono" font-size="24" letter-spacing="6" fill="#8A8F96" opacity="${f1(k)}">МЫСЛЬ #${n} · ${text}</text>`; }
+// финал-выбор: цветные кнопки + «решаете вы — в комментариях» + ЧАСТЬ 2
+function choiceEnd(t, t0, options) {
+  const u = t - t0, cols = [GREEN, GOLD, '#3E7CB1', NEON];
+  return fill('#05080B', 0.85) + options.map((o, i) => { const k = prog(u, 0.2 + i * 0.35, 0.5 + i * 0.35), y = 640 + i * 150;
+    return `<g opacity="${f1(k)}" transform="translate(540 ${f1(y + (1 - eout(k)) * 40)})"><rect x="-260" y="-56" width="520" height="112" rx="56" fill="${cols[i % 4]}"/>
+      <text y="18" text-anchor="middle" font-family="Inter" font-size="48" fill="#fff">${o}</text></g>`; }).join('')
+    + `<text x="540" y="${700 + options.length * 150}" text-anchor="middle" font-family="Inter" font-size="34" fill="#C9D2DA" opacity="${f1(prog(u, 1.4, 1.8))}">решаете вы — в комментариях</text>
+    <text x="540" y="${800 + options.length * 150}" text-anchor="middle" font-family="Inter" font-size="72" fill="${NEON}" opacity="${f1(prog(u, 1.9, 2.3))}">ЧАСТЬ 2</text>`;
 }
